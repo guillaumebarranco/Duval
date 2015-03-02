@@ -1,0 +1,136 @@
+<!DOCTYPE HTML>
+<html>
+<meta charset="utf-8" />
+	<head>
+		<title>
+			Duval's game
+		</title>
+
+		<style>
+			.search {
+				background-color: purple;
+				border-radius: 50px;
+				width: 100px;
+				height: 100px;
+				position: relative;
+				top: 0;
+				left: 0;
+			}
+
+			.duval {
+				position: absolute;
+				right: 0;
+				bottom: 0;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<img src="duval.png" class="duval" alt="Duval" width="50px" />
+
+		<div class="search">
+			
+		</div>
+
+		<div class="timer">0</div>
+
+		<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+		<script src="jqueryui.js"></script>
+
+		<script>
+
+			$(document).ready(function() {
+
+				var duval = $('.duval');
+				var loupe = $('.search');
+				var catched = 0;
+				var game_launched = false;
+				var game_finished = false;
+				var timer = 0;
+
+				$('.search').on('mousedown', function() {
+					if(game_launched === false) {
+						moveDuval();
+						game_launched = true;
+						updateTimer(timer);
+					}
+				});
+
+				$(loupe).draggable({
+
+					drag: function(e, ui ) {
+						if(
+							loupe.offset().left < duval.offset().left && 
+							loupe.offset().left + loupe.width() > duval.offset().left + duval.width() &&
+							loupe.offset().top < duval.offset().top && 
+							loupe.offset().top + loupe.height() > duval.offset().top + duval.height() &&
+							catched === 0
+						) {
+							//timer = Math.round(timer/1000);
+							alert('Vous avez attrapé Duval en '+ $('.timer').text()/1000 +' secondes !');
+							catched = 1;
+							game_finished = true;
+							loupe.remove();
+						}
+					}
+					
+				});
+
+				function updateTimer(timer) {
+					setTimeout(function() {
+						timer = timer + 20;
+
+						if(game_finished === false) {
+							$('.timer').text(timer);
+							updateTimer(timer);
+						}
+						
+						
+					}, 20);
+				}
+
+				var moveX;
+				var moveY;
+
+				function moveDuval() {
+
+					moveX = rand(-200, 200);
+					moveY = rand(-100, 100);
+
+					if(catched === 0) {
+						if(
+							parseInt(duval.css('right')) + moveX > 0 &&
+							parseInt(duval.css('right')) + duval.width() + moveX < $(window).width() &&
+							parseInt(duval.css('bottom')) + moveY > 0 &&
+							parseInt(duval.css('bottom')) + duval.width() + moveY < $(window).height()
+							
+						) {
+							$(duval).animate({
+		                        bottom: "+="+moveY,
+		                        right: "+="+moveX,
+		                      }, 200, function() {
+		                      	moveDuval();
+		                    });
+						} else {
+							moveDuval();
+						}
+					}
+					
+
+					
+				}
+
+				function rand(min, max) {
+					var koko = Math.floor(Math.random() * (max - min + 1)) + min;
+					return koko;
+				}
+
+
+
+			});	
+
+		</script>
+	</body>
+
+</html>
