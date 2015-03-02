@@ -7,17 +7,24 @@
 		</title>
 
 		<style>
+			body {
+				background-color: black;
+			}
 			.search {
-				background-color: purple;
+				background-color: transparent;
 				border-radius: 50px;
 				width: 100px;
 				height: 100px;
 				position: relative;
 				top: 0;
 				left: 0;
+				border: solid 1px white;
+			}
+			.timer {
+				color: white;
 			}
 
-			.duval {
+			.duval,.sanji {
 				position: absolute;
 				right: 0;
 				bottom: 0;
@@ -27,7 +34,11 @@
 	</head>
 
 	<body>
-		<img src="duval.png" class="duval" alt="Duval" width="50px" />
+		<img src="duval.png" class="duval" alt="Duval" width="50" />
+
+		<img src="sanji.png" class="sanji sanji1" alt="Sanji" width="70" />
+		<img src="sanji.png" class="sanji sanji2" alt="Sanji" width="70" />
+		<img src="sanji.png" class="sanji sanji3" alt="Sanji" width="70" />
 
 		<div class="search">
 			
@@ -43,90 +54,182 @@
 			$(document).ready(function() {
 
 				var duval = $('.duval');
+				var sanji = $('.sanji');
 				var loupe = $('.search');
 				var catched = 0;
 				var game_launched = false;
 				var game_finished = false;
 				var timer = 0;
+				var timer1 = 0
+				var timer2 = 0;
 
-				$('.search').on('mousedown', function() {
-					if(game_launched === false) {
-						moveDuval();
-						game_launched = true;
-						updateTimer(timer);
-					}
-				});
+				var games = {
+					"game1" : false,
+					"game2" : false,
+					"game3" : false,
+					"game4" : false,
+					"game5" : false
+				};
 
-				$(loupe).draggable({
 
-					drag: function(e, ui ) {
-						if(
-							loupe.offset().left < duval.offset().left && 
-							loupe.offset().left + loupe.width() > duval.offset().left + duval.width() &&
-							loupe.offset().top < duval.offset().top && 
-							loupe.offset().top + loupe.height() > duval.offset().top + duval.height() &&
-							catched === 0
-						) {
-							//timer = Math.round(timer/1000);
-							alert('Vous avez attrapé Duval en '+ $('.timer').text()/1000 +' secondes !');
-							catched = 1;
-							game_finished = true;
-							loupe.remove();
+				var moveX;
+				var moveY;
+				var _this = this;
+
+				this.gameOne = function() {
+
+					sanji.hide();
+
+					$('.search').on('mousedown', function() {
+						if(game_launched === false) {
+							moveDuval();
+							game_launched = true;
+							updateTimer(timer);
 						}
+					});
+
+					$(loupe).draggable({
+						drag: function(e, ui ) {
+							if(
+								loupe.offset().left < duval.offset().left && 
+								loupe.offset().left + loupe.width() > duval.offset().left + duval.width() &&
+								loupe.offset().top < duval.offset().top && 
+								loupe.offset().top + loupe.height() > duval.offset().top + duval.height() &&
+								catched === 0
+							) {
+								alert('Vous avez attrapé Duval en '+ $('.timer').text()/1000 +' secondes !');
+								catched = 1;
+								games['game1'] = true;
+								game_finished = true;
+								loupe.remove();
+								_this.gameSecond();
+							}
+						}
+					});
+
+					function moveDuval() {
+
+						moveX = rand(-200, 200);
+						moveY = rand(-100, 100);
+
+						if(catched === 0 && games['game1'] === false) {
+							if(
+								parseInt(duval.css('right')) + moveX > 0 &&
+								parseInt(duval.css('right')) + duval.width() + moveX < $(window).width() &&
+								parseInt(duval.css('bottom')) + moveY > 0 &&
+								parseInt(duval.css('bottom')) + duval.width() + moveY < $(window).height()
+							) {
+								$(duval).animate({
+			                        bottom: "+="+moveY,
+			                        right: "+="+moveX,
+			                      }, 80, function() {
+			                      	moveDuval();
+			                    });
+
+							} else {
+								moveDuval();
+							}
+						}					
 					}
-					
-				});
+				}
+
+				this.gameSecond = function() {
+
+					sanji.show();
+					catched = 0;
+					game_finished = false;
+
+					$(duval).animate({
+                        bottom: $(window).height() - duval.height(),
+                        right: $(window).width() - $('.duval').width(),
+                    }, 0);
+
+                    $('.sanji1').animate({
+                        bottom: 0,
+                        right: 0,
+                    }, 0);
+
+                    $('.sanji1').animate({
+                        bottom: $(window).height() - $('.sanji3').height(),
+                        right: 0,
+                    }, 0);
+
+                    $('.sanji1').animate({
+                        bottom: 0,
+                        right: $(window).width() - $('.sanji3').width(),
+                    }, 0);
+
+
+
+
+					moveSanji(0);
+
+					$(duval).draggable({
+						drag: function(e) {
+							if(
+								sanji.offset().left < duval.offset().left 
+								&& sanji.offset().left + sanji.width() > duval.offset().left + duval.width()
+								&& sanji.offset().top < duval.offset().top 
+								&& sanji.offset().top + sanji.height() + 20 > duval.offset().top + duval.height()
+							) {
+								alert('Sanji vous a attrapé en '+ $('.timer').text()/1000 +' secondes !');
+								catched = 1;
+								games['game2'] = true;
+								game_finished = true;
+								sanji.remove();
+							}
+						}
+					});
+
+					function moveSanji(number) {
+
+						moveX = rand(-450, 450);
+						moveY = rand(-250, 250);
+
+						if(catched === 0 && games['game2'] === false) {
+
+							if(number < 3) {
+								number++;
+							} else {
+								number = 0;
+							}
+
+							if(
+								parseInt($('.sanji'+number).css('right')) + moveX > 0 &&
+								parseInt($('.sanji'+number).css('right')) + $('.sanji'+number).width() + moveX < $(window).width() &&
+								parseInt($('.sanji'+number).css('bottom')) + moveY > 0 &&
+								parseInt($('.sanji'+number).css('bottom')) + $('.sanji'+number).width() + moveY < $(window).height()
+							) {
+								$('.sanji'+number).animate({
+			                        bottom: "+="+moveY,
+			                        right: "+="+moveX,
+			                      }, 100, function() {
+			                      	moveSanji(number);
+			                    });
+							} else {
+								moveSanji(number);
+							}
+						}					
+					}
+				}
+
+				this.gameOne();
 
 				function updateTimer(timer) {
+
 					setTimeout(function() {
 						timer = timer + 20;
-
 						if(game_finished === false) {
 							$('.timer').text(timer);
 							updateTimer(timer);
 						}
-						
-						
 					}, 20);
-				}
-
-				var moveX;
-				var moveY;
-
-				function moveDuval() {
-
-					moveX = rand(-200, 200);
-					moveY = rand(-100, 100);
-
-					if(catched === 0) {
-						if(
-							parseInt(duval.css('right')) + moveX > 0 &&
-							parseInt(duval.css('right')) + duval.width() + moveX < $(window).width() &&
-							parseInt(duval.css('bottom')) + moveY > 0 &&
-							parseInt(duval.css('bottom')) + duval.width() + moveY < $(window).height()
-							
-						) {
-							$(duval).animate({
-		                        bottom: "+="+moveY,
-		                        right: "+="+moveX,
-		                      }, 80, function() {
-		                      	moveDuval();
-		                    });
-						} else {
-							moveDuval();
-						}
-					}
-					
-
-					
 				}
 
 				function rand(min, max) {
 					var koko = Math.floor(Math.random() * (max - min + 1)) + min;
 					return koko;
 				}
-
-
 
 			});	
 
